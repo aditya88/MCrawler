@@ -1,0 +1,29 @@
+.project
+Changes
+MClient.pl
+Crawler.pl
+lib/CConfig.pm
+lib/DB.pm
+lib/Downloads_Queue.pm
+lib/Fetcher.pm
+lib/Handler.pm
+lib/MCrawler.pm
+lib/MediaWords.pm
+lib/MServer.pm
+lib/Provider.pm
+Makefile.PL
+MANIFEST
+MCrawler_config.yml
+MCrawler_DB.sql
+'not used/CruftText.pm'
+'not used/Downloads.pm'
+'not used/DownloadTexts.pm'
+'not used/Extractor.pm'
+'not used/HTML.pm'
+'not used/Server.pl'
+'not used/StripPP.pm'
+README
+refresh.sh
+seeds1.txt
+t/MCrawler.t
+temp/Cache.xml

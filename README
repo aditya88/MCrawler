@@ -1,0 +1,79 @@
+MCrawler version 0.01
+=====================
+
+The README is used to introduce the module and provide instructions on
+how to install the module, any machine dependencies it may have (for
+example C compilers and installed libraries) and any other information
+that should be provided before the module is installed.
+
+A README file is required for CPAN modules since CPAN extracts the
+README file from a module distribution so that people browsing the
+archive can use it get an idea of the modules uses. It is usually a
+good idea to provide version information here so that people can
+decide whether fixes for the module are worth downloading.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL				 --> creates make file
+   make                          --> automatically checks dependencies and install required packages from CPAN
+   make test					 --> tests not working need to write some
+   make install					 --> avoid installing it since in development phase
+   
+   Creating Database
+   
+   createdb -W -O crawler -U crawler crawlerdb   			   --> crawler is user
+   												 			   --> crawlerdb is DB name
+   												 			   --> default password is 'crawler'
+   
+   All default database values can be changed in MCrawler_config.yml
+   
+   psql -f <root_dir>/MCrawler_DB.sql -U crawler -d crawlerdb  --> creates database
+   
+   create roles for database clients:
+   login psql with super user permissions
+   CREATE ROLE "client_"<client_id> WITH LOGIN PASSWORD <client_database_password> ;
+   example: CREATE ROLE client_8989 WITH LOGIN PASSWORD 'secret';
+   
+   Starting the Crawler and Server 
+   
+   cd <Root_directory>
+   perl Crawler.PL
+   
+   Starting Client
+   
+   perl MClient.PL
+   
+   Client command format:
+   Making new request   		 --> new_request
+   Checking messages from server --> check_inbox
+   Queueing a URL				 --> queue_url <request_id> <url>
+   Queueing a file with URLs	 --> queue_file <request_id> <file_location>              
+   Other Settings				 --> downloads_type <request_id> <user_value>			  not_used
+   								 --> depth_of_search <request_id> <user_value>			  default_value -> 3
+   								 --> refresh_rate <request_id> <user_value>				  default_value -> 60*60*24
+   								 --> allowed_content <request_id> <user_value>			  default_value -> html|txt
+   								 --> user_agent <request_id> <user_value>				  default_value -> MCrawler bot (http://cyber.law.harvard.edu)
+								 --> dequeue_request <request_id>
+								 --> check_status <request_id>
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+	These are compulsory modules inorder to run Makefile.PL
+	
+	-> ExtUtils::MakeMaker
+	-> ExtUtils::AutoInstall
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) 2010 by aditya
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.1 or,
+at your option, any later version of Perl 5 you may have available.
+
+
