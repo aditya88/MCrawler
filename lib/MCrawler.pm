@@ -73,7 +73,7 @@ sub _add_attributes{
 	    
 	    }
 	flock($cache_file_handler,8);
-	print STDERR $file;
+	#print STDERR $file;
 	$xml = new XML::Simple (KeyAttr=>'request_id');
 	$data = $xml->XMLin($file);
 	

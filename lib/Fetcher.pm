@@ -31,7 +31,7 @@ sub do_fetch
     # print $download->{ _user_agent } ,"\n" ;
     if ($download->{ _user_agent } eq "")
     {
-    	$ua = LWP::RobotUA->new('MCrawler bot (http://cyber.law.harvard.edu)','amaddula@cyber.law.harvard.edu');
+    	$ua = LWP::RobotUA->new('MCrawler-bot/1.0 (http://cyber.law.harvard.edu)','amaddula@cyber.law.harvard.edu');
     }
     else
     {

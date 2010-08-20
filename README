@@ -57,6 +57,8 @@ To install this module type the following:
    								 --> user_agent <request_id> <user_value>				  default_value -> MCrawler bot (http://cyber.law.harvard.edu)
 								 --> dequeue_request <request_id>
 								 --> check_status <request_id>
+   
+   format of seeds.txt file is new line seperated URLs 
 DEPENDENCIES
 
 This module requires these other modules and libraries:
@@ -65,10 +67,47 @@ This module requires these other modules and libraries:
 	
 	-> ExtUtils::MakeMaker
 	-> ExtUtils::AutoInstall
+	
+SAMPLE INPUT/OUTPUT
+Admin creates a role by logging into crawler database with psql
+CREATE ROLE client_8989 WITH LOGIN PASSWORD 'client_password';
+change server port(default is 6666) and client id in MClient.PL pass it to client
+client starts a request by entering new_request.here is a series of standard commands.
+
+--> initiating a new request
+input --> new_request
+input --> check_inbox
+output --> you(8989) made new request 23
+
+--> sending input to server
+input --> queue_url 23 http://wikipedia.org
+input --> queue_file 23 ./seeds.txt
+
+--> configuring the request
+input --> depth_of_search 23 10
+input --> refresh_rate 23 7200
+input --> user_agent 23 MCrawler-bot/1.0 (http://cyber.law.harvard.edu)
+
+--> committing the request 
+input --> commit_request 23
+
+-->status checking
+input --> check_status 23
+output --> please check your request status on view_8989_23 table.
+			Out of 1 URLs,0 URLs are completed and remaining are in processing.
+
+next client login to postgres server with given password by admin.
+and can only has SELECT permission on view_8989_23 view.
+
+-->dequeueing
+input --> dequeue_request 23 
+dequeue removes request_id from the queue and stops any requests with that request_id.
+And any data in database with that request_id will be removed.
+
+
+if client has module to contact server directly syntax of communication can be seen after executing every command.
 
 COPYRIGHT AND LICENCE
-
-Put the correct copyright and licence information here.
 
 Copyright (C) 2010 by aditya
 

@@ -63,7 +63,6 @@ sub validate{
 	my $dbs = $self->dbs;
 	my $result = $dbs->query("SELECT client_id FROM requests WHERE request_id=?",$request_id)->hash;
 	
-	print Dumper($result),"in validate";
 	if ($result->{ client_id } == $client_id){
 		return 1;
 	}
@@ -97,7 +96,9 @@ sub make_settings{
         	case "commit_request"
         	{
 	        	print STDERR "Commit request \n";
-	        	$request->{ status } = "ready";	
+	        	$request->{ status } = "ready";
+	        	$dbs->update_by_id( "requests", $request->{ request_id }, $request );
+        		$dbs->commit();
             }
             case "check_status"
         	{
@@ -105,18 +106,36 @@ sub make_settings{
 	        	##TODO to be fixed hard coding
 	        	my $temp_view = "view_".$client_id."_".$request_id;
 	        	my $dbh;
-	        	if ($dbh=$dbs->query("CREATE VIEW ".$temp_view." AS SELECT * FROM downloads WHERE request_id=?",$request_id))
+	        	eval{
+	        		$dbs->query("CREATE VIEW ".$temp_view." AS SELECT * FROM downloads WHERE request_id=?",$request_id)or die $dbs->error;
+	        		};
+	        		
+	        	if($@ eq "")	
 	        	{
 	        		#new view created 
-	        		my $grant_permission = $dbs->query("GRANT SELECT ON ".$temp_view." TO client_".$client_id);
+	        		eval{
+	        			
+	        		$dbs->query("GRANT SELECT ON ".$temp_view." TO client_".$client_id) or die $dbs->error;	
 	        		
+	        		};
+	        		if ($@ ne "")
+					{
+						 print STDERR "$@";
+						 print STDOUT "Sorry role is not created for you, ask admin to create a role for you ";		
+					}
+					else{
+						print STDOUT "please check your request status on $temp_view table.";
+						my @urls_of_requests = $dbs->query("SELECT * FROM downloads_queue WHERE request_id=?",$request_id)->hashes();
+	        			my @url_done_statuses = $dbs->query("SELECT * FROM downloads_queue WHERE request_id=? AND status='done'",$request_id)->hashes();
+	        			my $total_urls = int(@urls_of_requests);
+	        			my $total_done_urls = int(@url_done_statuses);
+	        			print STDOUT "Out of $total_urls urls URLs,$total_done_urls URLs are completed and remaining are in processing.\n";
+					}
+	        	
 	        	}
-	        	print STDOUT "please check your request status on $temp_view table\n";
-	        	
-	        	my @urls_of_requests = $dbs->query("SELECT * FROM downloads_queue WHERE request_id=?",$request_id)->hashes();
-	        	my @url_done_statuses = $dbs->query("SELECT * FROM downloads_queue WHERE request_id=? AND status='done'",$request_id)->hashes();
-	        	
-	        	print STDOUT "Out of @urls_of_requests urls,@url_done_statuses are completed and remaining are in processing";
+	        	else {
+	        		print STDOUT "please check your request status on $temp_view table\n";
+	        	}
         
         	}
         	case "dequeue_request"
@@ -125,21 +144,30 @@ sub make_settings{
 	        	#revoke permissions and delete request
 	        	my $temp_view = "view_".$client_id."_".$request_id;
 	        	my $client = "client_".$client_id;
-	        	$dbs->query("REVOKE ALL PRIVILEGES ON ".$temp_view." FROM ".$client);
+	        	eval{
+	        	$dbs->query("REVOKE ALL PRIVILEGES ON ".$temp_view." FROM ".$client) or die $dbs->error;
 	        	$dbs->query("DROP VIEW ".$temp_view);
-	        	$dbs->query("DELETE FROM requests WHERE request_id=?",$request_id);
 	        	$dbs->query("DELETE FROM downloads_queue WHERE request_id=?",$request_id);
 	        	$dbs->query("DELETE FROM downloads WHERE request_id=?",$request_id);
+	        	$request->{ status } = "dequeued";
+	        	$dbs->update_by_id( "requests", $request->{ request_id }, $request );
+	        	print STDOUT " your($client_id) request($request_id) is dequeued\n";
+	        	$dbs->commit();
+	        	};
+	        	if($@ eq "")
+	        	{
+	        		print STDERR "success 2";
+	        	}
 	        	
 	        }
 	        else
 	        {
 	        	$request->{ $case } = shift(@tokens);
+	        	$dbs->update_by_id( "requests", $request->{ request_id }, $request );
+        		$dbs->commit();
 	        }
         }
-        print STDERR Dumper($request); 
-        $dbs->update_by_id( "requests", $request->{ request_id }, $request );
-        $dbs->commit();
+        #print STDERR Dumper($request); 
 	}
 }
 

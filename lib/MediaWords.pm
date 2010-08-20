@@ -14,7 +14,6 @@ use Data::Page;
 use Perl6::Say;
 use Data::Dumper;
 use base qw(DBIx::Simple);
-
 # STATICS
 
 # cache of table primary key columns

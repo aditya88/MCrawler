@@ -31,7 +31,7 @@ sub _create_connect_info_from_settings
         {
             AutoCommit     => 1,
             pg_enable_utf8 => 1,
-            RaiseError     => 1
+            RaiseError =>1
         }
     );
 }

@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+use constant SERVER_PORT => 6666;
+use constant CLIENT_ID => 8989;
 use strict;
 use warnings;
 use Switch;
@@ -6,8 +8,6 @@ use IO::Socket::INET;
 use threads;
 use threads::shared;
 use Perl6::Say;
-use constant SERVER_PORT => 6666;
-use constant CLIENT_ID => 8989;
 
 # Create a new socket
 

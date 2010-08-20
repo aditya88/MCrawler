@@ -328,12 +328,12 @@ sub _load_requests_to_file{
 	flock $reqs_file_handle,2 ;
 	##Temporary fix - writing all data from requests to 
 	my $xml = new XML::Simple (NoAttr=>1, RootName=>'requests');
-	print STDOUT Dumper(@requests_array);
+	#print STDOUT Dumper(@requests_array);
 	my ($data,$def) ;
 	$data = $xml->XMLout(\@requests_array);
-	print STDERR $data;
+	#print STDERR $data;
 	print $reqs_file_handle $data;
-	print Dumper($data);
+	#print Dumper($data);
 	flock $reqs_file_handle,8;
 	$reqs_file_handle->close();
 	

@@ -1,14 +1,14 @@
 CREATE TYPE download_state AS ENUM ('error', 'fetching', 'pending', 'queued', 'success');    
 CREATE TYPE download_type  AS ENUM ('archival_only','content');    
 CREATE TYPE download_status  AS ENUM ('done','error','new','ready','queued');
-CREATE TYPE request_status  AS ENUM ('done','error','new','ready','queued');
+CREATE TYPE request_status  AS ENUM ('done','error','new','ready','queued','dequeued');
 create table downloads (
     downloads_id        	serial          	primary key,
     request_id			int			not null,
     parent              	int             	null,
-    url                 	varchar(1024)   	not null,
-    location            	varchar(1024)   	null,
-    host                	varchar(1024)   	not null,
+    url                 	varchar(2048)   	not null,
+    location            	varchar(2048)   	null,
+    host                	varchar(2048)   	not null,
     download_time       	timestamp       	not null,
     type                	download_type   	not null,
     state               	download_state  	not null,
@@ -18,8 +18,8 @@ create table downloads (
     error_message       	text            	null,
     sequence            	int             	not null,
     extracted           	boolean         	not null default 'f',
-    mm_hash_url         	varchar(10)     	null,
-    mm_hash_location            varchar(10)     	null,
+    mm_hash_url         	varchar(20)     	null,
+    mm_hash_location            varchar(20)     	null,
     download_id_of_old_copy     int			null       
 );
 

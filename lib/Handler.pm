@@ -125,30 +125,39 @@ sub _call_pager
     my %hash_links   = map { $_, 1 } @links;
     my @unique_links = keys %hash_links;
     
-    print "Unique urls parsed: \n",join("\n",@unique_links) ,"\n";
+    #print "Unique urls parsed: \n",join("\n",@unique_links) ,"\n";
     my $j=0;
     $download ->{ childs } = int(@unique_links);
-    foreach $j (@unique_links)
+    my $request_check = $dbs->find_by_id('requests',$download->{ request_id });
+    if ($request_check->{ status } ne "dequeued")
     {
-		     	$dbs->create(
-		            'downloads',
-		            {
-		                parent        => $download->{ downloads_id },
-		                request_id	  => $download->{ request_id },
-		                url           => $j,
-		                host          => lc( ( URI::Split::uri_split( uri_unescape($j) ) )[ 1 ] ),
-		                type          => 'archival_only',
-		                sequence      => $download->{ sequence } + 1,
-		                state         => 'pending',
-		                download_time => 'now()',
-		                extracted     => 'f'
-		            }
-		        );
+	    foreach $j (@unique_links)
+	    {
+			     	$dbs->create(
+			            'downloads',
+			            {
+			                parent        => $download->{ downloads_id },
+			                request_id	  => $download->{ request_id },
+			                url           => $j,
+			                host          => lc( ( URI::Split::uri_split( uri_unescape($j) ) )[ 1 ] ),
+			                type          => 'archival_only',
+			                sequence      => $download->{ sequence } + 1,
+			                state         => 'pending',
+			                download_time => 'now()',
+			                extracted     => 'f'
+			            }
+			        );
+	    }
+	    $download ->{ extracted } = 't';
+	    $download->{ state } = 'success';
+	    $self->update_parent($download);
+	    $dbs->update_by_id( "downloads", $download->{ downloads_id }, $download );	
     }
-    $download ->{ extracted } = 't';
-    $download->{ state } = 'success';
-    $self->update_parent($download);
-    $dbs->update_by_id( "downloads", $download->{ downloads_id }, $download );
+    else
+    {
+    	print STDERR "request is dequeued so skipping \n";
+    }
+    
                    
 =comment
     my $parent_link = $self->$dbs->find_by_id( 'downloads', $download->{ downloads_id } );
@@ -294,7 +303,8 @@ sub update_parent
 	my $dbs = $self->engine->dbs;
 	if($download->{ parent } != 0)
 	{
-		my $parent = $dbs->find_by_id('downloads',$download->{ parent })->hash;
+		my $parent = $dbs->find_by_id('downloads',$download->{ parent });
+		#print STDERR "**********************",$parent -> { childs };
 	    $parent -> { childs } = $parent -> { childs } - 1;
 	    $dbs->update_by_id( "downloads",$parent->{ downloads_id }, $parent );
 	    if( $parent -> { childs } == 0 )
@@ -306,7 +316,7 @@ sub update_parent
 	{
 		#notify seeds that their downloads are finished
 		my $download_queue_row = $dbs->find_by_id("downloads_queue",$download->{ download_id });
-		$download_queue_row->{ status } = "success";
+		$download_queue_row->{ status } = "done";
 		$dbs->update_by_id("downloads_queue",$download_queue_row->{ url_id },$download_queue_row);
 		
 	}
